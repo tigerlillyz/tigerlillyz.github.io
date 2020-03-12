@@ -22,6 +22,7 @@ function App() {
     </div>
   );
 }
+export default App;
 
 // import React, { useState } from "react";
 // import "./styles.css";
@@ -47,4 +48,4 @@ function App() {
 //     </div>
 //   );
 // }
-// export default App;
+// 
