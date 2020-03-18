@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import './App.css';
 
 function App() {
 
@@ -47,7 +48,7 @@ function App() {
   }
 
   return (
-    <div className="App">
+    <div className="container">
       <SearchBar />
       <h2>Candidates and Party</h2>
       {candidateId} <br />
