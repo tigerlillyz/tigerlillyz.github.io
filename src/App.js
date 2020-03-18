@@ -10,30 +10,33 @@ function App() {
     fetch(url)
       .then(r => r.json())
       .then(r => r.results)
-      .then(r => setCandidateId(r[0].id));
-
-    return candidateId;
+      .then(r => {
+        setCandidateId(r[0].id);
+        GetCandidateFromId(r[0].id);
+      });
   }
 
   function GetCandidateFromId(props) {
     const url = `https://api.open.fec.gov/v1/candidate/${props}/?sort=name&page=1&api_key=SVuK6wlixoKEc7Ccdd7X2paVLHTAjGjJUZdlzAMp&sort_null_only=false&sort_nulls_last=false&sort_hide_null=false&per_page=20`
     fetch(url)
       .then(r => r.json())
-      .then(r => setCandidates(r.results));
+      .then(r => r.results)
+      .then(r => setCandidates(r[0]));
   }
 
   function SearchBar() {
     const [input, setInput] = useState({});
+
     const handleInputChange = (e) => setInput({
       ...input,
       [e.currentTarget.name]: e.currentTarget.value
     })
+
     const handleSubmit = (e) => {
       e.preventDefault();
-      let count = 0;
       GetCandidateId(e.currentTarget.candidateName.value);
-      GetCandidateFromId(candidateId);
     }
+
     return (
       <form onSubmit={handleSubmit}>
         <label>Candidate Name:</label>
@@ -47,9 +50,11 @@ function App() {
     <div className="App">
       <SearchBar />
       <h2>Candidates and Party</h2>
-      {candidateId}
-      {candidates}
-
+      {candidateId} <br />
+       <div>
+         Name: {candidates.name} <br />
+         Party: {candidates.party_full}
+       </div>
     </div>
   );
 }
