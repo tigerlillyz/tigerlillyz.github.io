@@ -3,6 +3,7 @@ import './App.css';
 import logo from './logo.svg';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'; 
 //import lines from './images/lines.png';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 import home from './pages/home';
 
