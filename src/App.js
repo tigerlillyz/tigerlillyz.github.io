@@ -1,11 +1,15 @@
 import React, { useState } from "react";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import Tabs from 'react-bootstrap/Tabs';
+import Tab from 'react-bootstrap/Tab';
 
 function App() {
 
-  const [candidateInfo, setCandidateInfo] = useState([]);
+  const [firstCandidateInfo, setFirstCandidateInfo] = useState([]);
+  const [secondCandidateInfo, setSecondCandidateInfo] = useState([]);
 
-  function FetchArrayOfIds(props) {
-    const url = `https://api.open.fec.gov/v1/names/candidates/?q=${props}&api_key=SVuK6wlixoKEc7Ccdd7X2paVLHTAjGjJUZdlzAMp`
+  function FetchArrayOfIds(name, number) {
+    const url = `https://api.open.fec.gov/v1/names/candidates/?q=${name}&api_key=SVuK6wlixoKEc7Ccdd7X2paVLHTAjGjJUZdlzAMp`
     fetch(url)
       .then(response => response.json())
       .then((json) => {
@@ -21,16 +25,16 @@ function App() {
         throw Error("Invalid Entry");
       } else {
         let idArray = results.map(result => result.id);
-        FindMostRecentId(idArray);
+        FindMostRecentId(idArray, number);
       }
     }
   }
 
-  function FindMostRecentId(props) {
-    const url = (props) => {
-      return `https://api.open.fec.gov/v1/candidate/${props}/?sort_nulls_last=false&sort_null_only=false&per_page=20&page=1&sort=name&api_key=SVuK6wlixoKEc7Ccdd7X2paVLHTAjGjJUZdlzAMp&sort_hide_null=false`
+  function FindMostRecentId(idArray, number) {
+    const url = (id) => {
+      return `https://api.open.fec.gov/v1/candidate/${id}/?sort_nulls_last=false&sort_null_only=false&per_page=20&page=1&sort=name&api_key=SVuK6wlixoKEc7Ccdd7X2paVLHTAjGjJUZdlzAMp&sort_hide_null=false`
     }
-    let urls = props.map(prop => url(prop));
+    let urls = idArray.map(id => url(id));
     Promise.all(urls.map(url => fetch(url)
       .then(r => r.json())
     ))
@@ -41,18 +45,21 @@ function App() {
     const handleJSON = (json) => {
       let activeThroughDates = json.map(object => object.results[0].active_through);
       let mostRecentDateIndex = activeThroughDates.indexOf(Math.max(...activeThroughDates));
-      let mostRecentId = props[mostRecentDateIndex];
-      GetCandidateFromId(mostRecentId);
+      let mostRecentId = idArray[mostRecentDateIndex];
+      GetCandidateFromId(mostRecentId, number);
     }
   }
 
-
-  function GetCandidateFromId(props) {
-    const url = `https://api.open.fec.gov/v1/candidate/${props}/?sort_nulls_last=false&sort_null_only=false&per_page=20&page=1&sort=name&api_key=SVuK6wlixoKEc7Ccdd7X2paVLHTAjGjJUZdlzAMp&sort_hide_null=false`
+  function GetCandidateFromId(mostRecentId, number) {
+    const url = `https://api.open.fec.gov/v1/candidate/${mostRecentId}/?sort_nulls_last=false&sort_null_only=false&per_page=20&page=1&sort=name&api_key=SVuK6wlixoKEc7Ccdd7X2paVLHTAjGjJUZdlzAMp&sort_hide_null=false`
     fetch(url)
       .then(r => r.json())
       .then(r => {
-        setCandidateInfo(r.results[0]);
+        if (number === 1) {
+          setFirstCandidateInfo(r.results[0]);
+        } else if (number === 2) {
+          setSecondCandidateInfo(r.results[0]);
+        }
       });
   }
 
@@ -72,13 +79,15 @@ function App() {
 
     const handleSubmit = (e) => {
       e.preventDefault();
-      FetchArrayOfIds(e.currentTarget.candidateName.value);
+      FetchArrayOfIds(e.currentTarget.firstCandidateName.value, 1);
+      FetchArrayOfIds(e.currentTarget.secondCandidateName.value, 2);
     }
 
     return (
       <form onSubmit={handleSubmit}>
         <label>Candidate Name:</label>
-        <input type="text" name="candidateName" onChange={handleInputChange} />
+        <input type="text" name="firstCandidateName" onChange={handleInputChange} />
+        <input type="text" name="secondCandidateName" onChange={handleInputChange} />
         <input type="submit" />
       </form>
     )
@@ -88,16 +97,28 @@ function App() {
     <div className="App">
       <SearchBar />
       <h2>Candidates and Party</h2>
-      {candidateInfo.candidate_id} <br />
-      {candidateInfo.name} <br />
-      {candidateInfo.party_full} <br />
-      {candidateInfo.active_through} <br />
-      {candidateInfo.address_street_1} <br />
-      {candidateInfo.address_city} <br />
-      {candidateInfo.address_state} <br />
-      <div>
+      <Tabs defaultActiveKey="firstCandidate">
+        <Tab eventKey="firstCandidate" title="1">
 
-      </div>
+          {firstCandidateInfo.candidate_id} <br />
+          {firstCandidateInfo.name} <br />
+          {firstCandidateInfo.party_full} <br />
+          {firstCandidateInfo.active_through} <br />
+          {firstCandidateInfo.address_street_1} <br />
+          {firstCandidateInfo.address_city} <br />
+          {firstCandidateInfo.address_state} <br />
+
+        </Tab>
+        <Tab eventKey="secondCandidate" title="2">
+          {secondCandidateInfo.candidate_id} <br />
+          {secondCandidateInfo.name} <br />
+          {secondCandidateInfo.party_full} <br />
+          {secondCandidateInfo.active_through} <br />
+          {secondCandidateInfo.address_street_1} <br />
+          {secondCandidateInfo.address_city} <br />
+          {secondCandidateInfo.address_state} <br />
+        </Tab>
+      </Tabs>
     </div>
   );
 }
